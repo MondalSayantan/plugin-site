@@ -5,6 +5,7 @@ const {
     processCategoryData,
     fetchLabelData,
     fetchStats,
+    fetchPluginHealthScores
 } = require('./utils');
 const {createRemoteFileNode} = require('gatsby-source-filesystem');
 
@@ -21,6 +22,10 @@ exports.sourceNodes = async (
             processCategoryData({createNode, createNodeField, createContentDigest, createNodeId, createRemoteFileNode, reporter}),
             fetchLabelData({createNode, createNodeField, createContentDigest, createNodeId, createRemoteFileNode, reporter}),
             fetchPluginVersions({createNode, createNodeField, createContentDigest, createNodeId, createRemoteFileNode, reporter, firstReleases}),
+                        fetchPluginHealthScores({
+                createNode,
+                reporter,
+            }),
         ]).then(() => fetchPluginData({createNode, createNodeField, createContentDigest, createNodeId, createRemoteFileNode, reporter, firstReleases, stats}));
     } catch (err) {
         reporter.panic(

@@ -237,6 +237,32 @@ const fetchPluginData = async ({createNode, createContentDigest, createNodeId, c
     sectionActivity.end();
 };
 
+const fetchPluginHealthScores = async ({ createNode, reporter }) => {
+    const sectionActivity = reporter.activityTimer(
+        "fetch plugin health scores"
+    );
+    sectionActivity.start();
+    const url = "https://plugin-health.jenkins.io/api/scores";
+    const healthScores = await requestGET({ url, reporter });
+    Object.keys(healthScores).forEach((pluginName) => {
+        const healthScore = healthScores[pluginName];
+        createNode({
+            ...healthScore,
+            id: pluginName,
+            parent: null,
+            children: [],
+            internal: {
+                type: "JenkinsPluginHealthScore",
+                contentDigest: crypto
+                    .createHash("md5")
+                    .update(`${pluginName}`)
+                    .digest("hex"),
+            },
+        });
+    });
+    sectionActivity.end();
+};
+
 const getImpliedDependenciesAndTitles = (plugin, detachedPlugins, updateData) => {
     for (const detached of detachedPlugins) {
         const [detachedPlugin, detachedCore, detachedVersion] = detached;
@@ -507,5 +533,6 @@ module.exports = {
     fixGitHubUrl,
     fetchStats,
     getPluginContent,
-    requestGET
+    requestGET,
+    fetchPluginHealthScores
 };
